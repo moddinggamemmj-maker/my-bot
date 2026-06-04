@@ -4,21 +4,33 @@ import datetime
 import threading
 import time
 import os
+from flask import Flask
 
-# The token is read securely from the Render environment variable
+# Flask server to keep the bot alive
+app = Flask(__name__)
+@app.route('/')
+def home():
+    return "Bot is running!"
+
+def run():
+    app.run(host='0.0.0.0', port=8080)
+
+threading.Thread(target=run).start()
+
+# Bot configuration
 TOKEN = os.environ.get('API_TOKEN')
 GROUP_ID = -1004250088932
-
-# Admin IDs
 ADMIN_IDS = [6794495658, 7368666569] 
 
 bot = telebot.TeleBot(TOKEN)
 
+# Database setup
 conn = sqlite3.connect('users.db', check_same_thread=False)
 cursor = conn.cursor()
 cursor.execute('CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY, start_date TEXT)')
 conn.commit()
 
+# Handlers
 @bot.message_handler(content_types=['new_chat_members'])
 def auto_add_user(message):
     for member in message.new_chat_members:
@@ -50,7 +62,6 @@ def check_and_kick():
                 uid, sdate = user
                 if uid in ADMIN_IDS:
                     continue
-                
                 start_date = datetime.datetime.strptime(sdate, '%Y-%m-%d')
                 if (today - start_date).days >= 30:
                     try:
