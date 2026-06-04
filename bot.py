@@ -3,11 +3,13 @@ import sqlite3
 import datetime
 import threading
 import time
+import os
 
-TOKEN = '8874937109:AAFjXQvRWYG5qtAnox8_cqyWaD0ZypCnZ0Q'
+# The token is read securely from the Render environment variable
+TOKEN = os.environ.get('API_TOKEN')
 GROUP_ID = -1004250088932
 
-# Admin IDs (You and your second account) who will never be kicked
+# Admin IDs
 ADMIN_IDS = [6794495658, 7368666569] 
 
 bot = telebot.TeleBot(TOKEN)
@@ -33,7 +35,7 @@ def add_user(message):
             start_date = datetime.datetime.now().strftime('%Y-%m-%d')
             cursor.execute('INSERT OR REPLACE INTO users (user_id, start_date) VALUES (?, ?)', (user_id, start_date))
             conn.commit()
-            bot.reply_to(message, "User added.")
+            bot.reply_to(message, "User added successfully.")
         else:
             bot.reply_to(message, "This user is an admin.")
     except:
